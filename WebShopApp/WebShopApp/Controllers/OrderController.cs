@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using SQLitePCL;
+
+using System.Globalization;
 using System.Security.Claims;
 
 using WebShopApp.Core.Contracts;
@@ -62,12 +65,61 @@ namespace WebShopApp.Controllers
                 _orderService.Create(bindingModel.ProductId, currentUserId, bindingModel.Quantity);
             }
 
-            return this.RedirectToAction("Index", "Product"); 
+            return this.RedirectToAction("Index", "Product");
         }
 
         public ActionResult Denied()
         {
             return View();
+        }
+
+        [Authorize(Roles = "Administrator")]
+        public ActionResult Index()
+        {
+            List<OrderIndexVM> orders = _orderService.GetOrders()
+            .Select(x => new OrderIndexVM
+            {
+                Id = x.Id,
+                OrderDate = x.OrderDate.ToString("dd-MMM-yyyy hh:mm", CultureInfo.InvariantCulture),
+                UserId = x.UserId,
+                User = x.User.UserName,
+                ProductId = x.ProductId,
+                Product = x.Product.ProductName,
+                Picture = x.Product.Picture,
+                Quantity = x.Quantity,
+                Price = x.Price,
+                Discount = x.Discount,
+                TotalPrice = x.TotalPrice,
+            }).ToList();
+
+            return View(orders);
+
+        }
+
+        public ActionResult MyOrders()
+        {
+            string currentUserId = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            //var user = context.Users.SingleOrDefault(u => u.Id == UserId);
+
+            List<OrderIndexVM> orders = _orderService.GetOrdersByUser(currentUserId)
+                .Select(x => new OrderIndexVM
+                {
+                    Id = x.Id,
+                    OrderDate = x.OrderDate.ToString("dd-MMM-yyyy hh:mm", CultureInfo.InvariantCulture),
+                    UserId = x.UserId,
+                    User = x.User.UserName,
+                    ProductId = x.ProductId,
+                    Product = x.Product.ProductName,
+                    Picture = x.Product.Picture,
+                    Quantity = x.Quantity,
+                    Price = x.Price,
+                    Discount = x.Discount,
+                    TotalPrice = x.TotalPrice,
+
+                }).ToList();
+
+            return View(orders);
+
         }
     }
 }

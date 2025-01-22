@@ -48,7 +48,30 @@ namespace WebShopApp.Core.Services
             return _context.SaveChanges() != 0;
         }
 
+        public Order GetOrderById(int orderId)
+        {
+            throw new NotImplementedException();
+        }
+
         public List<Order> GetOrders()
+        {
+            return _context.Orders.OrderByDescending(x => x.OrderDate).ToList();
+        }
+
+        public List<Order> GetOrdersByUser(string userId)
+        {
+            return _context.Orders.Where(x => x.UserId == userId)
+            .OrderByDescending(x => x.OrderDate)
+            .ToList();
+
+        }
+
+        public bool RemoveById(int orderId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool Update(int orderId, int productId, string userId, int quantity)
         {
             throw new NotImplementedException();
         }
